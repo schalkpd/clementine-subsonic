@@ -52,6 +52,7 @@ void SubsonicService::LazyPopulate(QStandardItem *item)
 
   case Type_Artist:
   case Type_Album:
+    qLog(Debug) << "Lazy loading" << item->data(Role_Id).toString();
     GetMusicDirectory(item->data(Role_Id).toString());
     break;
 
@@ -62,6 +63,12 @@ void SubsonicService::LazyPopulate(QStandardItem *item)
   item->setRowCount(0);
   QStandardItem* loading = new QStandardItem(tr("Loading..."));
   item->appendRow(loading);
+}
+
+smart_playlists::GeneratorPtr SubsonicService::CreateGenerator(QStandardItem* item)
+{
+  qLog(Debug) << "Attempting to smart load" << item->data(Role_Id).toString();
+  return smart_playlists::GeneratorPtr();
 }
 
 void SubsonicService::ReloadSettings()
@@ -156,6 +163,8 @@ void SubsonicService::ReadArtist(QXmlStreamReader *reader, QStandardItem *parent
                                           reader->attributes().value("name").toString());
   item->setData(Type_Artist, InternetModel::Role_Type);
   item->setData(true, InternetModel::Role_CanLazyLoad);
+  //item->setData(InternetModel::Type_SmartPlaylist, InternetModel::Role_Type);
+  //item->setData(InternetModel::PlayBehaviour_SingleItem, InternetModel::Role_PlayBehaviour);
   item->setData(id, Role_Id);
   parent->appendRow(item);
   item_lookup_.insert(id, item);
@@ -170,6 +179,8 @@ void SubsonicService::ReadAlbum(QXmlStreamReader *reader, QStandardItem *parent)
                                           reader->attributes().value("title").toString());
   item->setData(Type_Album, InternetModel::Role_Type);
   item->setData(true, InternetModel::Role_CanLazyLoad);
+  //item->setData(InternetModel::Type_SmartPlaylist, InternetModel::Role_Type);
+  //item->setData(InternetModel::PlayBehaviour_SingleItem, InternetModel::Role_PlayBehaviour);
   item->setData(id, Role_Id);
   parent->appendRow(item);
   item_lookup_.insert(id, item);
